@@ -21,7 +21,7 @@ app.get("/title", async (req, res) => {
 
     await browser.close();
 
-    res.send(title);
+    res.send(html);
 
 });
 
