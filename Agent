@@ -1,9 +1,28 @@
 const express = require("express");
+const { chromium } = require("playwright");
 
 const app = express();
 
 app.get("/", (req, res) => {
     res.send("SIGNAL_OS Browser Agent Online");
+});
+
+app.get("/title", async (req, res) => {
+
+    const browser = await chromium.launch({
+        headless: true
+    });
+
+    const page = await browser.newPage();
+
+    await page.goto(req.query.url);
+
+    const title = await page.title();
+
+    await browser.close();
+
+    res.send(title);
+
 });
 
 app.listen(3000, () => {
