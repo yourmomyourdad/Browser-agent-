@@ -28,6 +28,13 @@
             font-family: monospace;
             font-size: 16px;
         }
+        #screen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: fill; /* IMPORTANT: no letterboxing */
+}
     </style>
 </head>
 <body>
@@ -64,8 +71,8 @@ const screen = document.getElementById("screen");
 screen.addEventListener("click", (e) => {
     const rect = screen.getBoundingClientRect();
 
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = Math.floor((e.clientX - rect.left) / rect.width * 1280);
+    const y = Math.floor((e.clientY - rect.top) / rect.height * 720);
 
     socket.emit("click", { x, y });
 });

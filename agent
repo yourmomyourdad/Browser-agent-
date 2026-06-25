@@ -24,13 +24,16 @@ async function startBrowser() {
         headless: true
     });
 
-    page = await browser.newPage();
+    page = await browser.newPage({
+    viewport: { width: 1280, height: 720 }
+});
 
     console.log("Browser ready");
 
 await page.goto("https://google.com");
 
 await page.screencast.start({
+    size: { width: 1280, height: 720 },
     onFrame: ({ data }) => {
         const base64 = data.toString("base64");
         io.emit("frame", base64);
