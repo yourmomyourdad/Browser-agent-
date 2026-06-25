@@ -37,9 +37,7 @@ await page.screencast.start({
     }
 });
 }
-app.get("/", (req, res) => {
-    res.send("SIGNAL_OS Browser Agent Online");
-});
+
 
 app.get("/dom", async (req, res) => {
 
@@ -83,7 +81,7 @@ app.get("/screenshot", async (req, res) => {
 
 });
 
-app.get("/console", (req, res) => {
+app.get("/", (req, res) => {
     res.sendFile(__dirname + "/console.html");
 });
 

@@ -34,8 +34,9 @@
 <img
     id="screen"
     style="
-        width:100%;
-        max-width:1200px;
+        width: 100vw;
+        height: auto;
+        display: block;
     "
 >
 <div id="output">
@@ -95,7 +96,7 @@ async function renderPage() {
         .srcdoc = html;
 
 }
-screen.addEventListener("keydown", (e) => {
+document.addEventListener("keydown", (e) => {
     socket.emit("key", e.key);
 });
 cmd.addEventListener("keydown", async (e) => {
