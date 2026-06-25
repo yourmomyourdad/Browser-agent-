@@ -5,6 +5,17 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const AudioRecorder = require("node-audiorecorder");
+
+const audioOptions = {
+    program: "sox", // important
+    sampleRate: 44100,
+    channels: 1,
+    silence: 0
+};
+
+const recorder = new AudioRecorder(audioOptions);
+
 io.on("connection", (socket) => {
 
     socket.on("click", async ({ x, y }) => {
@@ -106,8 +117,13 @@ app.get("/title", async (req, res) => {
 
 startBrowser().then(() => {
 
+    recorder.start();
+
+    recorder.stream().on("data", (chunk) => {
+    io.emit("audio", chunk);
+    });
+
     server.listen(3000, () => {
         console.log("Agent running");
     });
-
 });

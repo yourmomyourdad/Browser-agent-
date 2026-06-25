@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "express": "^5.2.1",
+    "node-audiorecorder": "^3.0.0",
+    "node-record-lpcm16": "^1.0.1",
     "playwright": "^1.61.1",
     "socket.io": "^4.8.3"
   }

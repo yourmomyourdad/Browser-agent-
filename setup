@@ -1,0 +1,10 @@
+npx playwright install chromium
+sudo npx playwright install-deps     
+npm install playwright
+npm install express
+npm install socket.io
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+sudo apt-get install ffmpeg -y
+sudo apt-get update
+sudo apt-get install sox -y
+source ~/.bashrc

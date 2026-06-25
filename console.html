@@ -67,7 +67,28 @@ Type "help" for commands.
     
 <script>
 const screen = document.getElementById("screen");
+const output = document.getElementById("output");
+const cmd = document.getElementById("cmd");
+const socket = io();
+const audioCtx = new AudioContext();
 
+socket.on("audio", async (chunk) => {
+
+    try {
+        const buffer = chunk.buffer;
+
+        const audioBuffer = await audioCtx.decodeAudioData(buffer.slice(0));
+
+        const source = audioCtx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioCtx.destination);
+        source.start();
+
+    } catch (e) {
+        console.log("audio decode failed", e);
+    }
+
+});
 screen.addEventListener("click", (e) => {
     const rect = screen.getBoundingClientRect();
 
@@ -76,9 +97,7 @@ screen.addEventListener("click", (e) => {
 
     socket.emit("click", { x, y });
 });
-const output = document.getElementById("output");
-const cmd = document.getElementById("cmd");
-const socket = io();
+
 socket.on("connect", () => {
     print("CONNECTED");
 });
