@@ -21,6 +21,29 @@ app.get("/", (req, res) => {
     res.send("SIGNAL_OS Browser Agent Online");
 });
 
+app.get("/dom", async (req, res) => {
+
+    const dom = await page.evaluate(() => {
+
+        function serialize(element) {
+
+            return {
+                tag: element.tagName,
+                text: element.innerText,
+                children: [...element.children]
+                    .map(serialize)
+            };
+
+        }
+
+        return serialize(document.body);
+
+    });
+
+    res.json(dom);
+
+});
+
 app.get("/html", async (req, res) => {
 
     const html = await page.content();
