@@ -5,7 +5,16 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+io.on("connection", (socket) => {
 
+    socket.on("click", async ({ x, y }) => {
+        await page.mouse.click(x, y);
+    });
+
+    socket.on("key", async (key) => {
+    await page.keyboard.press(key);
+}); 
+});
 let browser;
 let page;
 
@@ -19,15 +28,12 @@ async function startBrowser() {
 
     console.log("Browser ready");
 
+await page.goto("https://google.com");
+
 await page.screencast.start({
-
     onFrame: ({ data }) => {
-
-        console.log(
-            data.constructor.name
-        );
-
-    
+        const base64 = data.toString("base64");
+        io.emit("frame", base64);
     }
 });
 }

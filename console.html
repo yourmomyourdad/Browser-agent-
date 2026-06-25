@@ -58,18 +58,25 @@ Type "help" for commands.
 </iframe>
     
 <script>
+const screen = document.getElementById("screen");
 
+screen.addEventListener("click", (e) => {
+    const rect = screen.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    socket.emit("click", { x, y });
+});
 const output = document.getElementById("output");
 const cmd = document.getElementById("cmd");
 const socket = io();
+socket.on("connect", () => {
+    print("CONNECTED");
+});
 
 socket.on("frame", (data) => {
-
-    document
-        .getElementById("screen")
-        .src =
-            "data:image/jpeg;base64," + data;
-
+    screen.src = "data:image/jpeg;base64," + data;
 });
 function print(text) {
     output.textContent += text + "\n";
@@ -88,6 +95,9 @@ async function renderPage() {
         .srcdoc = html;
 
 }
+screen.addEventListener("keydown", (e) => {
+    socket.emit("key", e.key);
+});
 cmd.addEventListener("keydown", async (e) => {
 
     if (e.key !== "Enter") return;
