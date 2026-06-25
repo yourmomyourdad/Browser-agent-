@@ -3,6 +3,7 @@ const { chromium } = require("playwright");
 const http = require("http");
 const { Server } = require("socket.io");
 const app = express();
+const server = http.createServer(app);
 const io = new Server(server);
 
 let browser;
@@ -17,11 +18,19 @@ async function startBrowser() {
     page = await browser.newPage();
 
     console.log("Browser ready");
+
+await page.screencast.start({
+
+    onFrame: ({ data }) => {
+
+        console.log(
+            data.constructor.name
+        );
+
+    
+    }
+});
 }
-page.screencast.start({
-  onFrame: ({ data, timestamp, viewportWidth, viewportHeight }) => {
-    io.emit("frame", data);
-  })
 app.get("/", (req, res) => {
     res.send("SIGNAL_OS Browser Agent Online");
 });
@@ -90,7 +99,7 @@ app.get("/title", async (req, res) => {
 
 startBrowser().then(() => {
 
-    app.listen(3000, () => {
+    server.listen(3000, () => {
         console.log("Agent running");
     });
 
