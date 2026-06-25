@@ -21,6 +21,10 @@ app.get("/", (req, res) => {
     res.send("SIGNAL_OS Browser Agent Online");
 });
 
+app.get("/console", (req, res) => {
+    res.sendFile(__dirname + "/console.html");
+});
+
 app.get("/navigate", async (req, res) => {
 
     await page.goto(req.query.url);
