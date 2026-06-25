@@ -90,6 +90,16 @@ cmd.addEventListener("keydown", async (e) => {
 
     }
 
+    else if (command === "html") {
+
+    const response = await fetch("/html");
+
+    const html = await response.text();
+
+    print(html);
+
+}
+
     else {
 
         print("Unknown command");
