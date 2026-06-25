@@ -71,6 +71,9 @@ const output = document.getElementById("output");
 const cmd = document.getElementById("cmd");
 const socket = io();
 socket.on("audio", (chunk) => {
+    console.log("received audio", chunk);
+});
+socket.on("audio", (chunk) => {
     const ctx = audioCtx;
 
     const buffer = ctx.createBuffer(1, chunk.length / 2, 44100);

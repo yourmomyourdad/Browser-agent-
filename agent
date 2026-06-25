@@ -16,6 +16,7 @@ const ffmpeg = spawn("ffmpeg", [
 ]);
 
 ffmpeg.stdout.on("data", (chunk) => {
+    console.log("AUDIO", chunk.length);
     io.emit("audio", chunk);
 });
 
