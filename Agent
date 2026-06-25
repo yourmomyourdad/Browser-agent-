@@ -17,7 +17,10 @@ async function startBrowser() {
 
     console.log("Browser ready");
 }
-
+await page.screencast.start({
+  onFrame: ({ data, timestamp, viewportWidth, viewportHeight }) => {
+    io.emit("frame", data);
+  })
 app.get("/", (req, res) => {
     res.send("SIGNAL_OS Browser Agent Online");
 });
