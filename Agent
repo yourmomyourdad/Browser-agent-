@@ -6,28 +6,41 @@ const app = express();
 let browser;
 let page;
 
+async function startBrowser() {
+
+    browser = await chromium.launch({
+        headless: true
+    });
+
+    page = await browser.newPage();
+
+    console.log("Browser ready");
+}
+
 app.get("/", (req, res) => {
     res.send("SIGNAL_OS Browser Agent Online");
 });
 
-app.get("/title", async (req, res) => {
-
-    const browser = await chromium.launch({
-        headless: true
-    });
-
-    const page = await browser.newPage();
+app.get("/navigate", async (req, res) => {
 
     await page.goto(req.query.url);
 
-    const title = await page.title();
-
-    await browser.close();
-
-    res.send(html);
+    res.send("Navigation complete");
 
 });
 
-app.listen(3000, () => {
-    console.log("Agent running");
+app.get("/title", async (req, res) => {
+
+    const title = await page.title();
+
+    res.send(title);
+
+});
+
+startBrowser().then(() => {
+
+    app.listen(3000, () => {
+        console.log("Agent running");
+    });
+
 });
