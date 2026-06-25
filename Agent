@@ -3,6 +3,9 @@ const { chromium } = require("playwright");
 
 const app = express();
 
+let browser;
+let page;
+
 app.get("/", (req, res) => {
     res.send("SIGNAL_OS Browser Agent Online");
 });
