@@ -70,24 +70,20 @@ const screen = document.getElementById("screen");
 const output = document.getElementById("output");
 const cmd = document.getElementById("cmd");
 const socket = io();
-const audioCtx = new AudioContext();
+socket.on("audio", (chunk) => {
+    const ctx = audioCtx;
 
-socket.on("audio", async (chunk) => {
+    const buffer = ctx.createBuffer(1, chunk.length / 2, 44100);
+    const data = buffer.getChannelData(0);
 
-    try {
-        const buffer = chunk.buffer;
-
-        const audioBuffer = await audioCtx.decodeAudioData(buffer.slice(0));
-
-        const source = audioCtx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioCtx.destination);
-        source.start();
-
-    } catch (e) {
-        console.log("audio decode failed", e);
+    for (let i = 0; i < data.length; i++) {
+        data[i] = chunk.readInt16LE(i * 2) / 32768;
     }
 
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.start();
 });
 screen.addEventListener("click", (e) => {
     const rect = screen.getBoundingClientRect();
