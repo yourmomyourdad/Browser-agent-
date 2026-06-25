@@ -30,7 +30,13 @@
     </style>
 </head>
 <body>
-
+<img
+    id="screen"
+    style="
+        width:100%;
+        max-width:1200px;
+    "
+>
 <div id="output">
 SIGNAL_OS Browser Agent
 
@@ -54,7 +60,16 @@ Type "help" for commands.
 
 const output = document.getElementById("output");
 const cmd = document.getElementById("cmd");
+const socket = io();
 
+socket.on("frame", (data) => {
+
+    document
+        .getElementById("screen")
+        .src =
+            "data:image/jpeg;base64," + data;
+
+});
 function print(text) {
     output.textContent += text + "\n";
     output.scrollTop = output.scrollHeight;
