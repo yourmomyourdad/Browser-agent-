@@ -64,6 +64,33 @@ await page.evaluate(async () => {
     console.log("sampleRate:", ctx.sampleRate);
 });
 
+await page.evaluate(async () => {
+
+    const ctx = new AudioContext();
+    await ctx.resume();
+
+    const osc = new OscillatorNode(ctx, {
+        type: "sine",
+        frequency: 440
+    });
+
+    const gain = new GainNode(ctx, {
+        gain: 0.05
+    });
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+
+    // Keep references so the browser doesn't garbage collect them
+    window.__ctx = ctx;
+    window.__osc = osc;
+    window.__gain = gain;
+
+    console.log("Oscillator started");
+
+});
 }
 
 
