@@ -40,7 +40,7 @@ async function startBrowser() {
     console.log(process.env.PULSE_SERVER);
     console.log(process.env.PULSE_SINK);
     browser = await chromium.launch({
-        headless: true
+        headless: true,
         ignoreDefaultArgs: ["--mute-audio"]
     });
 
@@ -54,6 +54,23 @@ page.on("console", msg => {
 
 await page.goto("https://google.com");
 
+const ffmpeg = spawn("ffmpeg", [
+    "-f", "pulse",
+    "-i", "NullSink.monitor",
+    "-c:a", "libopus",
+    "-application", "lowdelay",
+    "-f", "ogg",
+    "pipe:1"
+]);
+
+ffmpeg.stdout.on("data", chunk => {
+    io.emit("audio", chunk);
+});
+
+ffmpeg.stderr.on("data", data => {
+    console.log("[FFMPEG]", data.toString());
+});
+
 await page.screencast.start({
     size: { width: 1280, height: 720 },
     onFrame: ({ data }) => {
@@ -62,39 +79,6 @@ await page.screencast.start({
     }
 });
 
-await page.evaluate(async () => {
-    const ctx = new AudioContext();
-    await ctx.resume();
-
-    console.log("state:", ctx.state);
-    console.log("sampleRate:", ctx.sampleRate);
-    console.log("audio state:", ctx.state);
-    console.log("destination sampleRate:", ctx.sampleRate);
-    console.log("osc started at:", ctx.currentTime);
-   
-
-    const osc = new OscillatorNode(ctx, {
-        type: "sine",
-        frequency: 440
-    });
-
-    const gain = new GainNode(ctx, {
-        gain: 0.05
-    });
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start();
-
-    // Keep references so the browser doesn't garbage collect them
-    window.__ctx = ctx;
-    window.__osc = osc;
-    window.__gain = gain;
-
-    console.log("Oscillator started");
-
-});
 }
 
 

@@ -1,3 +1,4 @@
+bash nosound
 pulseaudio --start --exit-idle-time=-1
 pactl load-module module-null-sink sink_name=NullSink
 pactl list sinks short
