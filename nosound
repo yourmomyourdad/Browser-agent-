@@ -1,0 +1,1 @@
+pactl list short modules | grep module-null-sink | cut -f1 | xargs -r -n1 pactl unload-module
