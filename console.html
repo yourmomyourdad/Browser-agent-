@@ -71,8 +71,6 @@ const output = document.getElementById("output");
 const cmd = document.getElementById("cmd");
 const socket = io();
 socket.on("audio", (chunk) => {
-   const ctx = new AudioContext();
-
 const ctx = new AudioContext();
 let queue = [];
 let playing = false;
