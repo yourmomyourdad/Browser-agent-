@@ -7,24 +7,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 const { spawn } = require("child_process");
 
-function startAudio(io) {
-    const ffmpeg = spawn("ffmpeg", [
-        "-f", "lavfi",
-        "-i", "sine=frequency=440:sample_rate=44100",
-        "-f", "s16le",
-        "-ac", "1",
-        "-ar", "44100",
-        "-"
-    ]);
 
-    ffmpeg.stdout.on("data", (chunk) => {
-        io.emit("audio", chunk);
-    });
-
-    ffmpeg.stderr.on("data", (err) => {
-        console.log("ffmpeg:", err.toString());
-    });
-}
 io.on("connection", (socket) => {
 
     socket.on("click", async ({ x, y }) => {
@@ -39,7 +22,6 @@ let browser;
 let page;
 
 async function startBrowser() {
-    startAudio(io);
     browser = await chromium.launch({
         headless: true
     });
