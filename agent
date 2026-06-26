@@ -21,6 +21,7 @@ const pulseServer = "unix:" + match[1].trim();
 console.log(pulseServer);
 
 process.env.PULSE_SERVER = pulseServer;
+process.env.PULSE_SINK = "NullSink";
 
 io.on("connection", (socket) => {
 
