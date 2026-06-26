@@ -58,19 +58,29 @@ const ffmpeg = spawn("ffmpeg", [
     "-f", "pulse",
     "-i", "NullSink.monitor",
 
-    "-f", "s16le",
     "-ac", "2",
-    "-ar", "48000",
+    "-ar", "44100",
+    "-f", "s16le",
 
     "pipe:1"
 ]);
 
-ffmpeg.stdout.on("data", chunk => {
-    io.emit("audio", chunk);
-});
+let index = 0;
+let totalBytes = 0;
+let start = Date.now();
 
-ffmpeg.stderr.on("data", data => {
-    console.log("[FFMPEG]", data.toString());
+ffmpeg.stdout.on("data", chunk => {
+    index++;
+    totalBytes += chunk.length;
+
+    const elapsed = (Date.now() - start) / 1000;
+    const kbps = (totalBytes * 8 / elapsed / 1000).toFixed(1);
+
+    console.log(
+        `[AUDIO] #${index} size=${chunk.length} bytes | total=${totalBytes} | ~${kbps} kbps`
+    );
+
+    io.emit("audio", chunk);
 });
 
 await page.screencast.start({

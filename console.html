@@ -76,10 +76,7 @@ let playing = false;
 
 socket.on("audio", (chunk) => {
     queue.push(new Uint8Array(chunk));
-
-    if (!playing) {
-        playNext();
-    }
+    if (!playing) playNext();
 });
 
 function playNext() {
@@ -91,23 +88,16 @@ function playNext() {
     playing = true;
 
     const uint8 = queue.shift();
+    const int16 = new Int16Array(uint8.buffer);
 
-    const int16 = new Int16Array(
-        uint8.buffer,
-        uint8.byteOffset,
-        uint8.byteLength / 2
-    );
+    const buffer = ctx.createBuffer(2, int16.length / 2, 44100);
 
-    if (int16.length === 0) {
-        playNext();
-        return;
-    }
+    const left = buffer.getChannelData(0);
+    const right = buffer.getChannelData(1);
 
-    const buffer = ctx.createBuffer(1, int16.length, 48000);
-    const channel = buffer.getChannelData(0);
-
-    for (let i = 0; i < int16.length; i++) {
-        channel[i] = int16[i] / 32768;
+    for (let i = 0, j = 0; i < int16.length; i += 2, j++) {
+        left[j] = int16[i] / 32768;
+        right[j] = int16[i + 1] / 32768;
     }
 
     const source = ctx.createBufferSource();
