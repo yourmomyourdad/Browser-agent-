@@ -41,6 +41,7 @@ async function startBrowser() {
     console.log(process.env.PULSE_SINK);
     browser = await chromium.launch({
         headless: true
+        ignoreDefaultArgs: ["--mute-audio"]
     });
 
     page = await browser.newPage({
