@@ -127,81 +127,9 @@ function print(text) {
     output.textContent += text + "\n";
     output.scrollTop = output.scrollHeight;
 }
-async function renderPage() {
-
-    const response =
-        await fetch("/html");
-
-    const html =
-        await response.text();
-
-    document
-        .getElementById("browser")
-        .srcdoc = html;
-
-}
 document.addEventListener("keydown", (e) => {
     socket.emit("key", e.key);
 });
-cmd.addEventListener("keydown", async (e) => {
-
-    if (e.key !== "Enter") return;
-
-    const command = cmd.value.trim();
-
-    print("> " + command);
-
-    cmd.value = "";
-
-    if (command === "help") {
-
-        print("Commands:");
-        print("open <url>");
-        print("title");
-
-    }
-
-    else if (command.startsWith("open ")) {
-
-        const url = command.substring(5);
-
-        const response = await fetch(
-            "/navigate?url=" +
-            encodeURIComponent(url)
-        );
-
-        print(await response.text());
-
-    }
-
-    else if (command === "title") {
-
-        const response =
-            await fetch("/title");
-
-        print(await response.text());
-
-    }
-
-    else if (command === "html") {
-
-    const response = await fetch("/html");
-        
-    renderPage();
-
-    print("completed")
-
-}
-
-    else {
-
-        print("Unknown command");
-
-    }
-
-});
-
 </script>
-
 </body>
 </html>
