@@ -70,14 +70,16 @@ const screen = document.getElementById("screen");
 const output = document.getElementById("output");
 const cmd = document.getElementById("cmd");
 const socket = io();
-socket.on("audio", (chunk) => {
 const ctx = new AudioContext();
-let queue = [];
+const queue = [];
 let playing = false;
 
 socket.on("audio", (chunk) => {
     queue.push(new Uint8Array(chunk));
-    if (!playing) playNext();
+
+    if (!playing) {
+        playNext();
+    }
 });
 
 function playNext() {
@@ -90,14 +92,18 @@ function playNext() {
 
     const uint8 = queue.shift();
 
-    const int16 = new Int16Array(uint8.buffer, uint8.byteOffset, uint8.byteLength / 2);
+    const int16 = new Int16Array(
+        uint8.buffer,
+        uint8.byteOffset,
+        uint8.byteLength / 2
+    );
 
     if (int16.length === 0) {
         playNext();
         return;
     }
 
-    const buffer = ctx.createBuffer(1, int16.length, 44100);
+    const buffer = ctx.createBuffer(1, int16.length, 48000);
     const channel = buffer.getChannelData(0);
 
     for (let i = 0; i < int16.length; i++) {
@@ -111,7 +117,6 @@ function playNext() {
     source.onended = playNext;
     source.start();
 }
-});
 screen.addEventListener("click", (e) => {
     const rect = screen.getBoundingClientRect();
 
