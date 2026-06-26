@@ -71,22 +71,48 @@ const output = document.getElementById("output");
 const cmd = document.getElementById("cmd");
 const socket = io();
 socket.on("audio", (chunk) => {
-    console.log("received audio", chunk);
-});
+   const ctx = new AudioContext();
+
+const ctx = new AudioContext();
+let queue = [];
+let playing = false;
+
 socket.on("audio", (chunk) => {
-    const ctx = audioCtx;
+    queue.push(new Uint8Array(chunk));
+    if (!playing) playNext();
+});
 
-    const buffer = ctx.createBuffer(1, chunk.length / 2, 44100);
-    const data = buffer.getChannelData(0);
+function playNext() {
+    if (queue.length === 0) {
+        playing = false;
+        return;
+    }
 
-    for (let i = 0; i < data.length; i++) {
-        data[i] = chunk.readInt16LE(i * 2) / 32768;
+    playing = true;
+
+    const uint8 = queue.shift();
+
+    const int16 = new Int16Array(uint8.buffer, uint8.byteOffset, uint8.byteLength / 2);
+
+    if (int16.length === 0) {
+        playNext();
+        return;
+    }
+
+    const buffer = ctx.createBuffer(1, int16.length, 44100);
+    const channel = buffer.getChannelData(0);
+
+    for (let i = 0; i < int16.length; i++) {
+        channel[i] = int16[i] / 32768;
     }
 
     const source = ctx.createBufferSource();
     source.buffer = buffer;
     source.connect(ctx.destination);
+
+    source.onended = playNext;
     source.start();
+}
 });
 screen.addEventListener("click", (e) => {
     const rect = screen.getBoundingClientRect();

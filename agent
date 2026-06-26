@@ -6,20 +6,25 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const { spawn } = require("child_process");
-const ffmpeg = spawn("ffmpeg", [
-    "-f", "pulse",        // or "dshow" on windows
-    "-i", "default",
-    "-ac", "1",
-    "-ar", "44100",
-    "-f", "s16le",
-    "-"
-]);
 
-ffmpeg.stdout.on("data", (chunk) => {
-    console.log("AUDIO", chunk.length);
-    io.emit("audio", chunk);
-});
+function startAudio(io) {
+    const ffmpeg = spawn("ffmpeg", [
+        "-f", "lavfi",
+        "-i", "sine=frequency=440:sample_rate=44100",
+        "-f", "s16le",
+        "-ac", "1",
+        "-ar", "44100",
+        "-"
+    ]);
 
+    ffmpeg.stdout.on("data", (chunk) => {
+        io.emit("audio", chunk);
+    });
+
+    ffmpeg.stderr.on("data", (err) => {
+        console.log("ffmpeg:", err.toString());
+    });
+}
 io.on("connection", (socket) => {
 
     socket.on("click", async ({ x, y }) => {
@@ -34,7 +39,7 @@ let browser;
 let page;
 
 async function startBrowser() {
-
+    startAudio(io);
     browser = await chromium.launch({
         headless: true
     });
@@ -55,30 +60,12 @@ await page.screencast.start({
     }
 });
 
-await page.evaluate(() => {
+await page.evaluate(async () => {
     const ctx = new AudioContext();
+    await ctx.resume();
 
-    const osc = ctx.createOscillator();
-    osc.frequency.value = 440;
-
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 256;
-
-    osc.connect(analyser);
-    osc.start();
-
-    const data = new Uint8Array(analyser.frequencyBinCount);
-
-    setInterval(() => {
-        analyser.getByteFrequencyData(data);
-
-        let sum = 0;
-        for (let i = 0; i < data.length; i++) {
-            sum += data[i];
-        }
-
-        console.log("AUDIO LEVEL:", sum / data.length);
-    }, 300);
+    console.log("state:", ctx.state);
+    console.log("sampleRate:", ctx.sampleRate);
 });
 
 }
