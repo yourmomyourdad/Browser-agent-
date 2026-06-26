@@ -54,6 +54,33 @@ await page.screencast.start({
         io.emit("frame", base64);
     }
 });
+
+await page.evaluate(() => {
+    const ctx = new AudioContext();
+
+    const osc = ctx.createOscillator();
+    osc.frequency.value = 440;
+
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+
+    osc.connect(analyser);
+    osc.start();
+
+    const data = new Uint8Array(analyser.frequencyBinCount);
+
+    setInterval(() => {
+        analyser.getByteFrequencyData(data);
+
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) {
+            sum += data[i];
+        }
+
+        console.log("AUDIO LEVEL:", sum / data.length);
+    }, 300);
+});
+
 }
 
 
