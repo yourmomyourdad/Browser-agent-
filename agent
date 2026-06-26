@@ -64,7 +64,9 @@ await page.evaluate(async () => {
 
     console.log("state:", ctx.state);
     console.log("sampleRate:", ctx.sampleRate);
-
+    console.log("audio state:", ctx.state);
+    console.log("destination sampleRate:", ctx.sampleRate);
+    console.log("osc started at:", ctx.currentTime);
 
     const osc = new OscillatorNode(ctx, {
         type: "sine",

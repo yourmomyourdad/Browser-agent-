@@ -8,5 +8,5 @@ sudo apt-get install ffmpeg -y
 sudo apt-get update
 sudo apt-get install sox -y
 sudo apt-get install -y pulseaudio pulseaudio-utils ffmpeg
-pulseaudio --start --exit-idle-time=-1
 source ~/.bashrc
+bash sound
