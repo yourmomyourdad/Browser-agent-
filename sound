@@ -2,4 +2,4 @@ pulseaudio --start --exit-idle-time=-1
 pactl load-module module-null-sink sink_name=NullSink
 pactl list sinks short
 pactl set-default-sink NullSink
-PULSE_SINK=NullSink node server.js
+PULSE_SINK=NullSink node agent

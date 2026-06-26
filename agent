@@ -37,6 +37,8 @@ let browser;
 let page;
 
 async function startBrowser() {
+    console.log(process.env.PULSE_SERVER);
+    console.log(process.env.PULSE_SINK);
     browser = await chromium.launch({
         headless: true
     });
@@ -68,8 +70,7 @@ await page.evaluate(async () => {
     console.log("audio state:", ctx.state);
     console.log("destination sampleRate:", ctx.sampleRate);
     console.log("osc started at:", ctx.currentTime);
-    console.log(process.env.PULSE_SERVER);
-    console.log(process.env.PULSE_SINK);
+   
 
     const osc = new OscillatorNode(ctx, {
         type: "sine",
