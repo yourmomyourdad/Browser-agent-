@@ -62,9 +62,6 @@ await page.evaluate(async () => {
 
     console.log("state:", ctx.state);
     console.log("sampleRate:", ctx.sampleRate);
-});
-
-await page.evaluate(async () => {
 
     const ctx = new AudioContext();
     await ctx.resume();
