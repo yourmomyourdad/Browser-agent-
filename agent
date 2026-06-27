@@ -66,26 +66,24 @@ const ffmpeg = spawn("ffmpeg", [
     "pipe:1"
 ]);
 
+const PACKET_SIZE = 3528;
+let pending = Buffer.alloc(0);
 let sequence = 0;
-let totalBytes = 0;
-let start = Date.now();
 
-ffmpeg.stdout.on("data", chunk => {
-    sequence++;
-    totalBytes += chunk.length;
+ffmpeg.stdout.on("data", (chunk) => {
+    pending = Buffer.concat([pending, chunk]);
 
-    const elapsed = (Date.now() - start) / 1000;
-    const kbps = (totalBytes * 8 / elapsed / 1000).toFixed(1);
 
-    console.log(
-        `[AUDIO] #${sequence} size=${chunk.length} bytes | ~${kbps} kbps`
-    );
+    while (pending.length >= PACKET_SIZE) {
 
-    io.emit("audio", {
-    sequence,
-    sound: chunk
- });
+        const packet = pending.subarray(0, PACKET_SIZE);
+        pending = pending.subarray(PACKET_SIZE);
 
+        io.emit("audio", {
+            sequence: sequence++,
+            sound: packet
+        });
+    }
 });
 
 await page.screencast.start({
