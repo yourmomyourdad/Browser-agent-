@@ -56,6 +56,7 @@ await page.goto("https://google.com");
 
 const ffmpeg = spawn("ffmpeg", [
     "-f", "pulse",
+    "-fragment_size", "3840",
     "-i", "NullSink.monitor",
 
     "-ac", "2",
@@ -65,23 +66,23 @@ const ffmpeg = spawn("ffmpeg", [
     "pipe:1"
 ]);
 
-let index = 0;
+let sequence = 0;
 let totalBytes = 0;
 let start = Date.now();
 
 ffmpeg.stdout.on("data", chunk => {
-    index++;
+    sequence++;
     totalBytes += chunk.length;
 
     const elapsed = (Date.now() - start) / 1000;
     const kbps = (totalBytes * 8 / elapsed / 1000).toFixed(1);
 
     console.log(
-        `[AUDIO] #${index} size=${chunk.length} bytes | ~${kbps} kbps`
+        `[AUDIO] #${sequence} size=${chunk.length} bytes | ~${kbps} kbps`
     );
 
     io.emit("audio", {
-    index,
+    sequence,
     pcm: chunk
  });
 
