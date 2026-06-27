@@ -115,10 +115,12 @@ function playChunk(float32) {
     source.buffer = buffer;
     source.connect(ctx.destination);
 
+    let drift = playhead - ctx.currentTime;
+    let speed = 1 - drift * 0.01;
+    speed = Math.max(0.85, Math.min(1.15, speed));
 
+    playhead += buffer.duration * speed;
     source.start(playhead);
-
-    playhead += buffer.duration * dragSpeed;
 }
     
 screen.addEventListener("click", (e) => {
