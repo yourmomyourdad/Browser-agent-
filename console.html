@@ -93,7 +93,6 @@ playChunk(chunk.sound);
 console.log("Chunk: " + chunk.sequence + "| Delay: " + chunk.delay)
 
 timePast = timeNow
-
 });
 
 function pcm16ToFloat32(buffer) {
@@ -115,12 +114,15 @@ function playChunk(float32) {
     source.buffer = buffer;
     source.connect(ctx.destination);
 
-    let drift = playhead - ctx.currentTime;
-    let speed = 1 - drift * 0.01;
-    speed = Math.max(0.85, Math.min(1.15, speed));
+    const drift = playhead - ctx.currentTime;
+    const err = drift - delay/1000;
+    let k = 0.1
+    let dragSpeed = 1 + err * K;
 
-    playhead += buffer.duration * speed;
+    source.playbackRate.value = dragSpeed;
     source.start(playhead);
+    playhead += buffer.duration/dragSpeed;
+    
 }
     
 screen.addEventListener("click", (e) => {
