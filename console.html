@@ -82,32 +82,19 @@ let timeNow = 0;
 let timePast = null;
 let delay = 40;
 let dragSpeed = 1;
+let playhead = ctx.currentTime + 0.05;
 socket.on("audio", (chunk) => {
 
 timeNow = performance.now()
 if(timePast !== null)chunk.delay = timeNow-timePast;
 
 chunk.sound = pcm16ToFloat32(chunk.sound)
-
-packetHolder[chunk.sequence] = chunk;
-
+playChunk(chunk.sound);
 console.log("Chunk: " + chunk.sequence + "| Delay: " + chunk.delay)
 
 timePast = timeNow
 
-playAtTime(ctx, chunk.sound, ctx.currentTime + delay/1000)
 });
-
-function playAtTime(ctx, float32, time) {
-    const buffer = ctx.createBuffer(1, float32.length, ctx.sampleRate);
-    buffer.getChannelData(0).set(float32);
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(ctx.destination);
-
-    source.start(time);
-}
 
 function pcm16ToFloat32(buffer) {
     const input = new Int16Array(buffer);
