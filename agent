@@ -83,7 +83,7 @@ ffmpeg.stdout.on("data", chunk => {
 
     io.emit("audio", {
     sequence,
-    pcm: chunk
+    sound: chunk
  });
 
 });

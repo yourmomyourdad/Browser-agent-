@@ -71,27 +71,68 @@ const output = document.getElementById("output");
 const cmd = document.getElementById("cmd");
 const socket = io();
 const ctx = new AudioContext();
-const packetHolder = {};
 
 /*
 the jitterBug project is an adaptive jitter buffer designed in javascript and modeled after netEq it's split into 3 parts which I will be writing them in the order they're used 
 1.packetHolder this is updated in realtime by the backend the only actual code it executes is replacing the time it was sent with the difference of the time it was sent and the time it actually arrived as the departureTime 
 2.DelayManager this uses how long the average departureTime is for each packet and uses that to decide how long it needs to buffer for optimizing the audio stream 
 3.dragSpeed this is a relatively simple part of the project it just sets each slice to last until the next slice is scheduled to activate */
+const packetHolder = {};
 let timeNow = 0;
 let timePast = null;
+let delay = 40;
+let dragSpeed = 1;
 socket.on("audio", (chunk) => {
+
 timeNow = performance.now()
 if(timePast !== null)chunk.delay = timeNow-timePast;
+
+chunk.sound = pcm16ToFloat32(chunk.sound)
+
 packetHolder[chunk.sequence] = chunk;
+
 console.log("Chunk: " + chunk.sequence + "| Delay: " + chunk.delay)
+
 timePast = timeNow
+
+playAtTime(ctx, chunk.sound, ctx.currentTime + delay/1000)
 });
-function packetReceived(){
-    
+
+function playAtTime(ctx, float32, time) {
+    const buffer = ctx.createBuffer(1, float32.length, ctx.sampleRate);
+    buffer.getChannelData(0).set(float32);
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+
+    source.start(time);
 }
 
+function pcm16ToFloat32(buffer) {
+    const input = new Int16Array(buffer);
+    const output = new Float32Array(input.length);
 
+    for (let i = 0; i < input.length; i++) {
+        output[i] = input[i] / 32768;
+    }
+
+    return output;
+}
+function playChunk(float32) {
+
+    const buffer = ctx.createBuffer(1, float32.length, ctx.sampleRate);
+    buffer.getChannelData(0).set(float32);
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+
+
+    source.start(playhead);
+
+    playhead += buffer.duration * dragSpeed;
+}
     
 screen.addEventListener("click", (e) => {
     const rect = screen.getBoundingClientRect();
