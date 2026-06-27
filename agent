@@ -77,10 +77,14 @@ ffmpeg.stdout.on("data", chunk => {
     const kbps = (totalBytes * 8 / elapsed / 1000).toFixed(1);
 
     console.log(
-        `[AUDIO] #${index} size=${chunk.length} bytes | total=${totalBytes} | ~${kbps} kbps`
+        `[AUDIO] #${index} size=${chunk.length} bytes | ~${kbps} kbps`
     );
 
-    io.emit("audio", chunk);
+    io.emit("audio", {
+    index,
+    pcm: chunk
+ });
+
 });
 
 await page.screencast.start({
