@@ -84,49 +84,12 @@ let delay = 40;
 let dragSpeed = 1;
 let playhead = ctx.currentTime + 0.05;
 socket.on("audio", (chunk) => {
-
 timeNow = performance.now()
 if(timePast !== null)chunk.delay = timeNow-timePast;
-console.log(chunk.sound.numberOfChannels)
-chunk.sound = pcm16ToFloat32(chunk.sound)
-playChunk(chunk.sound);
 console.log(chunk)
-
 timePast = timeNow
-
 });
 
-function pcm16ToFloat32(buffer) {
-    const input = new Int16Array(buffer);
-    const output = new Float32Array(input.length);
-
-    for (let i = 0; i < input.length; i++) {
-        output[i] = input[i] / 32768;
-    }
-
-    return output;
-}
-function playChunk(float32) {
-    if (playhead < ctx.currentTime) {
-    playhead = ctx.currentTime + delay/1000; 
-}
-    const buffer = ctx.createBuffer(1, float32.length, ctx.sampleRate);
-    buffer.getChannelData(0).set(float32);
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(ctx.destination);
-
-    const drift = playhead - ctx.currentTime;
-    const err = drift - delay/1000;
-    let k = 3
-    let dragSpeed = 1 + err * k;
-
-    source.playbackRate.value = dragSpeed;
-    source.start(playhead);
-    playhead += buffer.duration/dragSpeed;
-    console.log(err)
-}
     
 screen.addEventListener("click", (e) => {
     const rect = screen.getBoundingClientRect();
