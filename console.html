@@ -87,7 +87,7 @@ socket.on("audio", (chunk) => {
 
 timeNow = performance.now()
 if(timePast !== null)chunk.delay = timeNow-timePast;
-
+console.log(chunk.sound.numberOfChannels)
 chunk.sound = pcm16ToFloat32(chunk.sound)
 playChunk(chunk.sound);
 console.log(chunk)
