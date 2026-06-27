@@ -86,9 +86,26 @@ let playhead = ctx.currentTime + 0.05;
 socket.on("audio", (chunk) => {
 timeNow = performance.now()
 if(timePast !== null)chunk.delay = timeNow-timePast;
+chunk.sound = int16ToFloat32(chunk.sound)
 console.log(chunk)
 timePast = timeNow
 });
+function streamSplit(buffer){
+const leftBuffer = {}
+const rightBuffer = {}
+for(i=0;i<buffer.length;i+=2){
+leftBuffer[i/2] = buffer[i]
+rightBuffer[i/2] = buffer[i+1]
+}
+//the left/right switch for owen :D
+if(switch === true){
+return ({left:rightBuffer,right:leftBuffer})}
+return ({left:leftBuffer,right:rightBuffer})
+}
+function int16ToFloat32(chunk){
+const newArray = new Float32Array(2)   
+for(i=0;i<chunk.length;i++){newArray[i] = chunk[i]/32768;}
+return newArray}
 
     
 screen.addEventListener("click", (e) => {
