@@ -78,33 +78,51 @@ the jitterBug project is an adaptive jitter buffer designed in javascript and mo
 2.DelayManager this uses how long the average departureTime is for each packet and uses that to decide how long it needs to buffer for optimizing the audio stream 
 3.dragSpeed this is a relatively simple part of the project it just sets each slice to last until the next slice is scheduled to activate */
 const packetHolder = {};
+let owenCheck= false;
 let timeNow = 0;
 let timePast = null;
 let delay = 40;
 let dragSpeed = 1;
 let playhead = ctx.currentTime + 0.05;
 socket.on("audio", (chunk) => {
+console.log(chunk.sound, chunk.sound.length);
 timeNow = performance.now()
 if(timePast !== null)chunk.delay = timeNow-timePast;
 chunk.sound = int16ToFloat32(chunk.sound)
 console.log(chunk)
 timePast = timeNow
+const source = ctx.createBufferSource();
+// set the buffer in the AudioBufferSourceNode
+source.buffer = streamSplit(chunk.sound);
+// connect the AudioBufferSourceNode to the
+// destination so we can hear the sound
+source.connect(ctx.destination);
+// start the source playing
+source.start();
+console.log(source)
 });
 function streamSplit(buffer){
-const leftBuffer = {}
-const rightBuffer = {}
-for(i=0;i<buffer.length;i+=2){
-leftBuffer[i/2] = buffer[i]
-rightBuffer[i/2] = buffer[i+1]
+const myArrayBuffer = ctx.createBuffer(2, buffer.length, 44100);
+const leftBuffer = new Float32Array(buffer.length / 2);
+const rightBuffer = new Float32Array(buffer.length / 2);
+for (let i = 0; i < buffer.length; i += 2) {
+    leftBuffer[i / 2] = buffer[i];
+    rightBuffer[i / 2] = buffer[i + 1];
 }
 //the left/right switch for owen :D
-if(switch === true){
-return ({left:rightBuffer,right:leftBuffer})}
-return ({left:leftBuffer,right:rightBuffer})
+if(owenCheck === true){
+myArrayBuffer.getChannelData(0).set(rightBuffer);
+myArrayBuffer.getChannelData(1).set(leftBuffer);
+return myArrayBuffer
+}
+myArrayBuffer.getChannelData(0).set(leftBuffer);
+myArrayBuffer.getChannelData(1).set(rightBuffer);
+return myArrayBuffer
 }
 function int16ToFloat32(chunk){
-const newArray = new Float32Array(2)   
-for(i=0;i<chunk.length;i++){newArray[i] = chunk[i]/32768;}
+    const int16 = new Int16Array(chunk);
+const newArray = new Float32Array(int16)   
+for(i=0;i<int16.length;i++){newArray[i] = int16[i]/32768;}
 return newArray}
 
     
