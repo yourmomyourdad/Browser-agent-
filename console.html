@@ -71,42 +71,28 @@ const output = document.getElementById("output");
 const cmd = document.getElementById("cmd");
 const socket = io();
 const ctx = new AudioContext();
-const queue = [];
-let playing = false;
+const packetHolder = {};
 
+/*
+the jitterBug project is an adaptive jitter buffer designed in javascript and modeled after netEq it's split into 3 parts which I will be writing them in the order they're used 
+1.packetHolder this is updated in realtime by the backend the only actual code it executes is replacing the time it was sent with the difference of the time it was sent and the time it actually arrived as the departureTime 
+2.DelayManager this uses how long the average departureTime is for each packet and uses that to decide how long it needs to buffer for optimizing the audio stream 
+3.dragSpeed this is a relatively simple part of the project it just sets each slice to last until the next slice is scheduled to activate */
+let timeNow = 0;
+let timePast = null;
 socket.on("audio", (chunk) => {
-    queue.push(new Uint8Array(chunk));
-    if (!playing) playNext();
+timeNow = performance.now()
+if(timePast !== null)chunk.delay = timeNow-timePast;
+packetHolder[chunk.sequence] = chunk;
+console.log("Chunk: " + chunk.sequence + "| Delay: " + chunk.delay)
+timePast = timeNow
 });
-
-function playNext() {
-    if (queue.length === 0) {
-        playing = false;
-        return;
-    }
-
-    playing = true;
-
-    const uint8 = queue.shift();
-    const int16 = new Int16Array(uint8.buffer);
-
-    const buffer = ctx.createBuffer(2, int16.length / 2, 44100);
-
-    const left = buffer.getChannelData(0);
-    const right = buffer.getChannelData(1);
-
-    for (let i = 0, j = 0; i < int16.length; i += 2, j++) {
-        left[j] = int16[i] / 32768;
-        right[j] = int16[i + 1] / 32768;
-    }
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(ctx.destination);
-
-    source.onended = playNext;
-    source.start();
+function packetReceived(){
+    
 }
+
+
+    
 screen.addEventListener("click", (e) => {
     const rect = screen.getBoundingClientRect();
 
