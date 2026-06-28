@@ -84,19 +84,59 @@ let timePast = null;
 let delay = 40;
 let dragSpeed = 1;
 let playhead = ctx.currentTime + 0.05;
+class PacketBuffer {
+
+constructor(packetSize) {
+
+this.data = new Uint8Array(packetSize);
+
+this.writePos = 0;
+
+this.idealSize = packetSize;
+
+this.counterPart = null;
+
+}
+
+receive(arrayBuffer){
+
+if(this.writePos+arraybuffer.byteLength < this.idealSize){this.data.set(arrayBuffer,this.writePos) ;this.writePos += arrayBuffer.byteLength}
+
+else if (this.writePos+arraybuffer.byteLength >= this.idealSize){
+
+const firstPart = arrayBuffer.subarray(0, arrayBuffer.byteLength+this.writePos-this.idealSize);
+
+const leftOver = arrayBuffer.subarray(arrayBuffer.byteLength+this.writePos-this.idealSize)
+
+this.data.set(firstPart,this.writePos)
+
+console.log(this.data.byteLength)
+
+this.counterPart.receive(leftOver)
+
+activeBuffer = this.counterPart
+
+}
+
+reset(){this.writePos = 0;}
+
+} 
+
+bufferA = new PacketBuffer(8820)
+bufferB= new PacketBuffer(8820)
+let activeBuffer = bufferA
+bufferA.counterpart = bufferB
+bufferB.counterpart = bufferA
 socket.on("audio", (chunk) => {
 console.log(chunk.sound, chunk.sound.length);
-timeNow = performance.now()
-if(timePast !== null)chunk.delay = timeNow-timePast;
-chunk.sound = int16ToFloat32(chunk.sound)
+activeBuffer.receive(chunk.sound)
 console.log(chunk)
-timePast = timeNow
 const source = ctx.createBufferSource();
 // set the buffer in the AudioBufferSourceNode
 source.buffer = streamSplit(chunk.sound);
 // connect the AudioBufferSourceNode to the
 // destination so we can hear the sound
-source.connect(ctx.destination);
+//source.connect(ctx.destination);
 // start the source playing
 console.log(source.buffer.duration)
 source.start(playhead);
@@ -106,7 +146,7 @@ console.log({
     playhead: playhead.toFixed(3),
     ahead: (playhead - ctx.currentTime).toFixed(3)
 });
-});
+})
 function streamSplit(buffer){
 const myArrayBuffer = ctx.createBuffer(2, buffer.length/2, 44100);
 const leftBuffer = new Float32Array(buffer.length / 2);
