@@ -5,29 +5,6 @@
     <title>SIGNAL_OS Browser Agent</title>
 
     <style>
-        body {
-            background: black;
-            color: lime;
-            font-family: monospace;
-            margin: 0;
-            padding: 10px;
-        }
-
-        #output {
-            white-space: pre-wrap;
-            height: 90vh;
-            overflow-y: auto;
-        }
-
-        #cmd {
-            width: 100%;
-            background: black;
-            color: lime;
-            border: none;
-            outline: none;
-            font-family: monospace;
-            font-size: 16px;
-        }
         #screen {
     position: fixed;
     inset: 0;
@@ -46,12 +23,7 @@
         display: block;
     "
 >
-<div id="output">
-SIGNAL_OS Browser Agent
-
-Type "help" for commands.
-
-</div>
+<div id="output"></div>
 
 <input id="cmd" autocomplete="off" autofocus>
     
@@ -67,8 +39,6 @@ Type "help" for commands.
     
 <script>
 const screen = document.getElementById("screen");
-const output = document.getElementById("output");
-const cmd = document.getElementById("cmd");
 const socket = io();
 const ctx = new AudioContext();
 
@@ -117,18 +87,18 @@ this.counterPart.receive(leftOver)
 activeBuffer = this.counterPart
 
 }
-
+}
 reset(){
     this.writePos = 0;
 }
 
-} 
 
+}
 bufferA = new PacketBuffer(8820)
 bufferB= new PacketBuffer(8820)
 let activeBuffer = bufferA
-bufferA.counterpart = bufferB
-bufferB.counterpart = bufferA
+bufferA.counterPart = bufferB
+bufferB.counterPart = bufferA
 socket.on("audio", (chunk) => {
 console.log(chunk.sound, chunk.sound.length);
 activeBuffer.receive(chunk.sound)
